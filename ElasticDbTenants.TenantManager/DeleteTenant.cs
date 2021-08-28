@@ -40,6 +40,9 @@ namespace ElasticDbTenants.TenantManager
             // Delete the tenant database
             await context.CallActivityAsync("DeleteTenant_DeleteDb", input);
 
+            // Delete tenant from Catalog DB
+            await context.CallActivityAsync("DeleteTenant_DeleteFromCatalog", input);
+
             // Notify the App back-end
             await context.CallActivityAsync("DeleteTenant_NotifyComplete", input);
         }
@@ -59,13 +62,28 @@ namespace ElasticDbTenants.TenantManager
             await _sqlManagementClient.Databases.DeleteAsync(rgName, serverName, dbName);
         }
 
+        [FunctionName("DeleteTenant_DeleteFromCatalog")]
+        public async Task DeleteFromCatalog(
+            [ActivityTrigger] DeleteTenantInputModel model)
+        {
+            var tenant = await _catalogDbContext.Tenants
+                .SingleAsync(t => t.Id == model.TenantId);
+
+            _catalogDbContext.Tenants.Remove(tenant);
+
+            await _catalogDbContext.SaveChangesAsync();
+        }
+
         [FunctionName("DeleteTenant_NotifyComplete")]
         public async Task NotifyComplete(
             [ActivityTrigger] DeleteTenantInputModel model)
         {
             var client = _httpClientFactory.CreateClient(HttpClients.AppApi);
-            await client.DeleteAsync(
-                $"{_configuration["AppBackendBaseUrl"]}/api/tenants/{model.TenantId}");
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"{_configuration["AppBackendBaseUrl"]}/api/notifications/tenants/{model.TenantId}/deleted");
+            await client.SendAsync(request);
+            // TODO: Check response
         }
 
         [FunctionName("DeleteTenant_HttpStart")]

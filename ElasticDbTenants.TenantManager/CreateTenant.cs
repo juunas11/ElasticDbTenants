@@ -129,6 +129,7 @@ ALTER ROLE [db_datawriter] ADD MEMBER [{username}];");
             tenant.ConnectionString = createDatabaseResult.ConnectionString;
             tenant.ServerName = createDatabaseResult.ServerName;
             tenant.DatabaseName = createDatabaseResult.DatabaseName;
+            tenant.CreationStatus = CatalogDb.Models.TenantCreationStatus.Completed;
             await _catalogDbContext.SaveChangesAsync();
         }
 
@@ -138,12 +139,11 @@ ALTER ROLE [db_datawriter] ADD MEMBER [{username}];");
         {
             // Notification to API -> SignalR -> FE
             var client = _httpClientFactory.CreateClient(HttpClients.AppApi);
-            await client.PutAsJsonAsync(
-                $"{_configuration["AppBackendBaseUrl"]}/api/tenants/{notifyCompleteModel.Input.TenantId}/createStatus",
-                new
-                {
-                    Status = CatalogDb.Models.TenantCreationStatus.Completed
-                });
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"{_configuration["AppBackendBaseUrl"]}/api/notifications/tenants/{notifyCompleteModel.Input.TenantId}/created");
+            await client.SendAsync(request);
+            // TODO: Check response
         }
 
         [FunctionName("CreateTenant_HttpStart")]

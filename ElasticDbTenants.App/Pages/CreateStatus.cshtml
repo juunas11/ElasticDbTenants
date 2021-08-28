@@ -19,19 +19,17 @@
     <script>
         $(function() {
             function bindConnectionMessage(connection) {
-                var messageCallback = function(tenantId, tenantStatus) {
+                var messageCallback = function(tenantId) {
                     var $statusElement = $("#status");
                     if ($statusElement.data('tenantId') !== tenantId) {
                         return;
                     }
 
-                    $statusElement.html(tenantStatus);
-                    if (tenantStatus === "Completed") {
-                        $("#openLink").removeClass("invisible");
-                    }
+                    $statusElement.html("Completed");
+                    $("#openLink").removeClass("invisible");
                 };
 
-                connection.on('statusUpdated', messageCallback);
+                connection.on('tenantCreated', messageCallback);
                 connection.onclose(onConnectionError);
             }
 
