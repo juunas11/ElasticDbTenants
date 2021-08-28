@@ -14,12 +14,16 @@
 
 <a id="openLink" asp-page="ViewTenant" asp-route-tenantId="@Model.TenantId" class="btn btn-primary @(Model.TenantCreationStatus != CatalogDb.Models.TenantCreationStatus.Completed ? "invisible": "")">Open</a>
 
+<form method="post" asp-page-handler="Retry">
+    <button id="retryButton" type="submit" class="btn btn-secondary invisible">Retry</button>
+</form>
+
 @section Scripts {
     <script type="text/javascript" src="@("https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.0/dist/browser/signalr.min.js")"></script>
     <script>
         $(function() {
             function bindConnectionMessage(connection) {
-                var messageCallback = function(tenantId) {
+                var onTenantCreated = function(tenantId) {
                     var $statusElement = $("#status");
                     if ($statusElement.data('tenantId') !== tenantId) {
                         return;
@@ -28,8 +32,18 @@
                     $statusElement.html("Completed");
                     $("#openLink").removeClass("invisible");
                 };
+                var onTenantCreateFailed = function(tenantId) {
+                    var $statusElement = $("#status");
+                    if ($statusElement.data('tenantId') !== tenantId) {
+                        return;
+                    }
 
-                connection.on('tenantCreated', messageCallback);
+                    $statusElement.html("Failed");
+                    $("#retryButton").removeClass("invisible");
+                }
+
+                connection.on('tenantCreated', onTenantCreated);
+                connection.on('tenantCreateFailed', onTenantCreateFailed);
                 connection.onclose(onConnectionError);
             }
 

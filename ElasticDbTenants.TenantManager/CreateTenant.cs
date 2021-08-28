@@ -42,26 +42,34 @@ namespace ElasticDbTenants.TenantManager
         {
             var input = context.GetInput<CreateTenantInputModel>();
 
-            // Create tenant database in elastic pool
-            var createDbResult = await context.CallActivityAsync<CreateDatabaseResult>(
-                "CreateTenant_CreateDb", input);
-
-            // Create tables
-            await context.CallActivityAsync("CreateTenant_InitializeDb", createDbResult);
-
-            // Give the App back-end access to tenant DB
-            await context.CallActivityAsync("CreateTenant_GrantBackendAccessToDb", createDbResult);
-
-            // Save tenant DB details in catalog
-            await context.CallActivityAsync("CreateTenant_SaveDbDetails", createDbResult);
-
-            // Notify creation complete to App
-            var notifyCompletionModel = new CreateTenantNotifyCompleteModel
+            try
             {
-                Input = input,
-                CreateDbResult = createDbResult
-            };
-            await context.CallActivityAsync("CreateTenant_NotifyComplete", notifyCompletionModel);
+                // Create tenant database in elastic pool
+                var createDbResult = await context.CallActivityAsync<CreateDatabaseResult>(
+                    "CreateTenant_CreateDb", input);
+
+                // Create tables
+                await context.CallActivityAsync("CreateTenant_InitializeDb", createDbResult);
+
+                // Give the App back-end access to tenant DB
+                await context.CallActivityAsync("CreateTenant_GrantBackendAccessToDb", createDbResult);
+
+                // Save tenant DB details in catalog
+                await context.CallActivityAsync("CreateTenant_SaveDbDetails", createDbResult);
+
+                // Notify creation complete to App
+                var notifyCompletionModel = new CreateTenantNotifyCompleteModel
+                {
+                    Input = input,
+                    CreateDbResult = createDbResult
+                };
+                await context.CallActivityAsync("CreateTenant_NotifyComplete", notifyCompletionModel);
+            }
+            catch
+            {
+                await context.CallActivityAsync("CreateTenant_NotifyFailed", input);
+                throw;
+            }
         }
 
         [FunctionName("CreateTenant_CreateDb")]
@@ -70,7 +78,7 @@ namespace ElasticDbTenants.TenantManager
         {
             var serverName = _configuration["ElasticPoolServerName"];
             var dbName = $"tenant-{input.TenantId}";
-            var createdDb = await _sqlManagementClient.Databases.CreateOrUpdateAsync(
+            await _sqlManagementClient.Databases.CreateOrUpdateAsync(
                 _configuration["ElasticPoolResourceGroup"],
                 serverName,
                 dbName,
@@ -115,7 +123,8 @@ namespace ElasticDbTenants.TenantManager
             string username = _configuration["BackendUsername"];
             
             await tenantDbContext.Database.ExecuteSqlRawAsync(
-$@"CREATE USER [{username}] FROM EXTERNAL PROVIDER;
+$@"IF NOT EXISTS (SELECT principal_id FROM sys.database_principals WHERE name = '{username}')
+CREATE USER [{username}] FROM EXTERNAL PROVIDER;
 ALTER ROLE [db_datareader] ADD MEMBER [{username}];
 ALTER ROLE [db_datawriter] ADD MEMBER [{username}];");
         }
@@ -142,6 +151,18 @@ ALTER ROLE [db_datawriter] ADD MEMBER [{username}];");
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
                 $"{_configuration["AppBackendBaseUrl"]}/api/notifications/tenants/{notifyCompleteModel.Input.TenantId}/created");
+            await client.SendAsync(request);
+            // TODO: Check response
+        }
+
+        [FunctionName("CreateTenant_NotifyFailed")]
+        public async Task NotifyFailed(
+            [ActivityTrigger] CreateTenantInputModel model)
+        {
+            var client = _httpClientFactory.CreateClient(HttpClients.AppApi);
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"{_configuration["AppBackendBaseUrl"]}/api/notifications/tenants/{model.TenantId}/createFailed");
             await client.SendAsync(request);
             // TODO: Check response
         }

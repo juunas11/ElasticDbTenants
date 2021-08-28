@@ -37,14 +37,22 @@ namespace ElasticDbTenants.TenantManager
         {
             var input = context.GetInput<DeleteTenantInputModel>();
 
-            // Delete the tenant database
-            await context.CallActivityAsync("DeleteTenant_DeleteDb", input);
+            try
+            {
+                // Delete the tenant database
+                await context.CallActivityAsync("DeleteTenant_DeleteDb", input);
 
-            // Delete tenant from Catalog DB
-            await context.CallActivityAsync("DeleteTenant_DeleteFromCatalog", input);
+                // Delete tenant from Catalog DB
+                await context.CallActivityAsync("DeleteTenant_DeleteFromCatalog", input);
 
-            // Notify the App back-end
-            await context.CallActivityAsync("DeleteTenant_NotifyComplete", input);
+                // Notify the App back-end
+                await context.CallActivityAsync("DeleteTenant_NotifyComplete", input);
+            }
+            catch
+            {
+                await context.CallActivityAsync("DeleteTenant_NotifyFailed", input);
+                throw;
+            }
         }
 
         [FunctionName("DeleteTenant_DeleteDb")]
@@ -53,7 +61,12 @@ namespace ElasticDbTenants.TenantManager
         {
             var tenant = await _catalogDbContext.Tenants
                 .AsNoTracking()
-                .SingleAsync(t => t.Id == model.TenantId);
+                .SingleOrDefaultAsync(t => t.Id == model.TenantId);
+            if (tenant is null)
+            {
+                // Tenant has already been deleted
+                return;
+            }
 
             var rgName = _configuration["ElasticPoolResourceGroup"];
             var serverName = tenant.ServerName;
@@ -67,7 +80,12 @@ namespace ElasticDbTenants.TenantManager
             [ActivityTrigger] DeleteTenantInputModel model)
         {
             var tenant = await _catalogDbContext.Tenants
-                .SingleAsync(t => t.Id == model.TenantId);
+                .SingleOrDefaultAsync(t => t.Id == model.TenantId);
+            if (tenant is null)
+            {
+                // Already deleted
+                return;
+            }
 
             _catalogDbContext.Tenants.Remove(tenant);
 
@@ -82,6 +100,18 @@ namespace ElasticDbTenants.TenantManager
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
                 $"{_configuration["AppBackendBaseUrl"]}/api/notifications/tenants/{model.TenantId}/deleted");
+            await client.SendAsync(request);
+            // TODO: Check response
+        }
+
+        [FunctionName("DeleteTenant_NotifyFailed")]
+        public async Task NotifyFailed(
+            [ActivityTrigger] DeleteTenantInputModel model)
+        {
+            var client = _httpClientFactory.CreateClient(HttpClients.AppApi);
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"{_configuration["AppBackendBaseUrl"]}/api/notifications/tenants/{model.TenantId}/deleteFailed");
             await client.SendAsync(request);
             // TODO: Check response
         }

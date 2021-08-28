@@ -30,12 +30,32 @@ namespace ElasticDbTenants.App.Controllers
             return NoContent();
         }
 
+        [HttpPost("tenants/{tenantId}/createFailed")]
+        public async Task<IActionResult> TenantCreateFailed(
+            [FromRoute] Guid tenantId)
+        {
+            await _createHubContext.Clients.All
+                .SendAsync("tenantCreateFailed", tenantId.ToString());
+
+            return NoContent();
+        }
+
         [HttpPost("tenants/{tenantId}/deleted")]
         public async Task<IActionResult> TenantDeleted(
             [FromRoute] Guid tenantId)
         {
             await _deleteHubContext.Clients.All
                 .SendAsync("tenantDeleted", tenantId.ToString());
+
+            return NoContent();
+        }
+
+        [HttpPost("tenants/{tenantId}/deleteFailed")]
+        public async Task<IActionResult> TenantDeleteFailed(
+            [FromRoute] Guid tenantId)
+        {
+            await _deleteHubContext.Clients.All
+                .SendAsync("tenantDeleteFailed", tenantId.ToString());
 
             return NoContent();
         }

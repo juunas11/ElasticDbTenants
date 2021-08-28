@@ -10,6 +10,10 @@
 
 <a id="backToIndexLink" asp-page="Index" class="btn btn-primary @(Model.TenantExists ? "invisible": "")">Back to index</a>
 
+<form method="post" asp-page-handler="Retry">
+    <button id="retryButton" type="submit" class="btn btn-secondary invisible">Retry</button>
+</form>
+
 @section Scripts {
     <script type="text/javascript" src="@("https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.0/dist/browser/signalr.min.js")"></script>
     <script>
@@ -24,8 +28,18 @@
                     $statusElement.html("Completed");
                     $("#backToIndexLink").removeClass("invisible");
                 };
+                var onTenantDeleteFailed = function(tenantId) {
+                    var $statusElement = $("#status");
+                    if ($statusElement.data('tenantId') !== tenantId) {
+                        return;
+                    }
+
+                    $statusElement.html("Failed");
+                    $("#retryButton").removeClass("invisible");
+                }
 
                 connection.on('tenantDeleted', onTenantDeleted);
+                connection.on('tenantDeleteFailed', onTenantDeleteFailed);
                 connection.onclose(onConnectionError);
             }
 
