@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31410.414
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticDbTenants.TenantManager", "ElasticDbTenants.TenantManager\ElasticDbTenants.TenantManager.csproj", "{E68CB387-A2CD-4D02-A81D-BB112FD12401}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticDbTenants.CatalogDb", "ElasticDbTenants.CatalogDb\ElasticDbTenants.CatalogDb.csproj", "{CDA01521-A6A1-4384-8CF9-EE039E09FCFB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticDbTenants.TenantDb", "ElasticDbTenants.TenantDb\ElasticDbTenants.TenantDb.csproj", "{AC83C195-E6A5-4E25-B558-C61B68CE9684}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticDbTenants.App", "ElasticDbTenants.App\ElasticDbTenants.App.csproj", "{F97FAFBC-F181-475C-85E0-66EBD17EAFE7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticDbTenants.Db.Common", "ElasticDbTenants.Db.Common\ElasticDbTenants.Db.Common.csproj", "{A7C0D2AE-6947-4B39-B53B-3C0E9682EB24}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E68CB387-A2CD-4D02-A81D-BB112FD12401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68CB387-A2CD-4D02-A81D-BB112FD12401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68CB387-A2CD-4D02-A81D-BB112FD12401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68CB387-A2CD-4D02-A81D-BB112FD12401}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDA01521-A6A1-4384-8CF9-EE039E09FCFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDA01521-A6A1-4384-8CF9-EE039E09FCFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDA01521-A6A1-4384-8CF9-EE039E09FCFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDA01521-A6A1-4384-8CF9-EE039E09FCFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC83C195-E6A5-4E25-B558-C61B68CE9684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC83C195-E6A5-4E25-B558-C61B68CE9684}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC83C195-E6A5-4E25-B558-C61B68CE9684}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC83C195-E6A5-4E25-B558-C61B68CE9684}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F97FAFBC-F181-475C-85E0-66EBD17EAFE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F97FAFBC-F181-475C-85E0-66EBD17EAFE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F97FAFBC-F181-475C-85E0-66EBD17EAFE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F97FAFBC-F181-475C-85E0-66EBD17EAFE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7C0D2AE-6947-4B39-B53B-3C0E9682EB24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7C0D2AE-6947-4B39-B53B-3C0E9682EB24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7C0D2AE-6947-4B39-B53B-3C0E9682EB24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7C0D2AE-6947-4B39-B53B-3C0E9682EB24}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A85CE4E5-259D-4B90-8BEF-8C10F6001937}
+	EndGlobalSection
+EndGlobal

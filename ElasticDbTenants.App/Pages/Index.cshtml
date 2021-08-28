@@ -1,0 +1,75 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Tenants";
+}
+
+<h1>Tenants</h1>
+
+<a asp-page="Create" class="btn btn-primary">Create</a>
+
+<hr />
+
+@if(Model.Tenants.Count == 0)
+{
+    <p>No tenants created yet.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Creation status</th>
+                <th>Connection string</th>
+                <th></th>
+                <th></th>
+			</tr>
+		</thead>
+        <tbody>
+            @foreach (var tenant in Model.Tenants)
+            {
+                <tr>
+                    <td>@tenant.Id</td>
+                    <td>@tenant.Name</td>
+                    <td>@tenant.CreationStatus.ToString()</td>
+                    <td>@tenant.ConnectionString</td>
+                    <td>
+                        @if (tenant.CreationStatus == CatalogDb.Models.TenantCreationStatus.Completed)
+                        {
+                            <a asp-page="ViewTenant" asp-route-tenantId="@tenant.Id" class="btn btn-secondary">Open</a>
+                        }
+					</td>
+                    <td>
+                        @if (tenant.CreationStatus == CatalogDb.Models.TenantCreationStatus.Completed)
+                        {
+                            <button type="button" class="btn btn-danger deleteButton" data-tenant-id="@tenant.Id">Delete</button>
+                        }
+                    </td>
+				</tr>
+            }
+        </tbody>
+	</table>
+}
+
+<form method="post" asp-page-handler="Delete" id="tenantDeleteForm">
+    <input type="hidden" id="tenantIdToDelete" asp-for="TenantIdToDelete" />
+</form>
+
+@section Scripts {
+    <script>
+        $('.deleteButton').click(function(){
+            var $this = $(this);
+            var tenantId = $this.data('tenantId');
+            console.info($this);
+            console.info(tenantId);
+            if (!confirm('Are you sure?')) {
+                return;
+            }
+
+            $('#tenantIdToDelete').val(tenantId);
+            $('#tenantDeleteForm').submit();
+        });
+	</script>
+}

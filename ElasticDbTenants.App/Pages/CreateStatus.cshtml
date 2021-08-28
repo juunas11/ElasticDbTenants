@@ -1,0 +1,61 @@
+﻿@page "{tenantId}"
+@model ElasticDbTenants.App.Pages.CreateStatusModel
+@{
+    ViewData["Title"] = "Create tenant status";
+}
+
+<h1>Create tenant status</h1>
+
+<ul>
+    <li>Id: @Model.TenantId</li>
+    <li>Name: @Model.TenantName</li>
+    <li>Status: <span id="status" data-tenant-id="@Model.TenantId">@Model.TenantCreationStatus.ToString()</span></li>
+</ul>
+
+<a id="openLink" asp-page="ViewTenant" asp-route-tenantId="@Model.TenantId" class="btn btn-primary @(Model.TenantCreationStatus != CatalogDb.Models.TenantCreationStatus.Completed ? "invisible": "")">Open</a>
+
+@section Scripts {
+    <script type="text/javascript" src="@("https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.0/dist/browser/signalr.min.js")"></script>
+    <script>
+        $(function() {
+            function bindConnectionMessage(connection) {
+                var messageCallback = function(tenantId, tenantStatus) {
+                    var $statusElement = $("#status");
+                    if ($statusElement.data('tenantId') !== tenantId) {
+                        return;
+                    }
+
+                    $statusElement.html(tenantStatus);
+                    if (tenantStatus === "Completed") {
+                        $("#openLink").removeClass("invisible");
+                    }
+                };
+
+                connection.on('statusUpdated', messageCallback);
+                connection.onclose(onConnectionError);
+            }
+
+            function onConnected(connection) {
+                console.log('connection started');
+            }
+
+            function onConnectionError(error) {
+                if (error && error.message) {
+                    console.error(error.message);
+                }
+            }
+
+            var connection = new signalR.HubConnectionBuilder()
+                                        .withUrl('/tenantCreate')
+                                        .build();
+            bindConnectionMessage(connection);
+            connection.start()
+                .then(function () {
+                    onConnected(connection);
+                })
+                .catch(function (error) {
+                    console.error(error.message);
+                });
+        });
+	</script>
+}

@@ -1,0 +1,55 @@
+﻿@page "{tenantId}"
+@model ElasticDbTenants.App.Pages.DeleteStatusModel
+@{
+    ViewData["Title"] = "Delete tenant status";
+}
+
+<h1>Delete tenant status</h1>
+
+<p>Status: <span id="status" data-tenant-id="@Model.TenantId">@(Model.TenantExists ? "Started" : "Completed")</span></p>
+
+<a id="backToIndexLink" asp-page="Index" class="btn btn-primary @(Model.TenantExists ? "invisible": "")">Back to index</a>
+
+@section Scripts {
+    <script type="text/javascript" src="@("https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.0/dist/browser/signalr.min.js")"></script>
+    <script>
+        $(function() {
+            function bindConnectionMessage(connection) {
+                var onTenantDeleted = function(tenantId) {
+                    var $statusElement = $("#status");
+                    if ($statusElement.data('tenantId') !== tenantId) {
+                        return;
+                    }
+
+                    $statusElement.html("Completed");
+                    $("#backToIndexLink").removeClass("invisible");
+                };
+
+                connection.on('tenantDeleted', onTenantDeleted);
+                connection.onclose(onConnectionError);
+            }
+
+            function onConnected(connection) {
+                console.log('connection started');
+            }
+
+            function onConnectionError(error) {
+                if (error && error.message) {
+                    console.error(error.message);
+                }
+            }
+
+            var connection = new signalR.HubConnectionBuilder()
+                                        .withUrl('/tenantDelete')
+                                        .build();
+            bindConnectionMessage(connection);
+            connection.start()
+                .then(function () {
+                    onConnected(connection);
+                })
+                .catch(function (error) {
+                    console.error(error.message);
+                });
+        });
+	</script>
+}

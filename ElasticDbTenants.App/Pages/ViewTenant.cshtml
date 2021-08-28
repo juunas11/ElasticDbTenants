@@ -1,0 +1,47 @@
+﻿@page "{tenantId}"
+@model ElasticDbTenants.App.Pages.ViewTenantModel
+@{
+    ViewData["Title"] = "View tenant";
+}
+
+<h1>Todos for tenant "@Model.TenantName"</h1>
+
+<hr />
+
+<form method="post" asp-page-handler="Create">
+    <input type="hidden" asp-for="TenantId" />
+    <div class="form-group">
+        <label asp-for="NewTodoText"></label>
+        <input asp-for="NewTodoText" class="form-control" />
+	</div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+<hr />
+
+@if (Model.Todos.Count == 0)
+{
+    <p>No todos exist.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Text</th>
+                <th>Is done?</th>
+			</tr>
+		</thead>
+        <tbody>
+            @foreach(var todo in Model.Todos)
+            {
+                <tr>
+                    <td>@todo.Id</td>
+                    <td>@todo.Text</td>
+                    <td>@(todo.IsDone ? "Yes" : "No")</td>
+				</tr>
+            }
+        </tbody>
+	</table>
+}
