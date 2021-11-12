@@ -22,7 +22,7 @@ namespace ElasticDbTenants.Db.Common
             _tokenCredential = tokenCredential;
         }
 
-        public override async Task<InterceptionResult> ConnectionOpeningAsync(
+        public override async ValueTask<InterceptionResult> ConnectionOpeningAsync(
             DbConnection connection,
             ConnectionEventData eventData,
             InterceptionResult result,
